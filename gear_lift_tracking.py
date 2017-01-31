@@ -3,12 +3,6 @@
 import cv2
 import numpy as np
 import constants
-import math
-import logging
-#from networktables import NetworkTable
-import socket
-import pickle
-import struct
 
 def get_center(contour):
     #get moments data from contour
@@ -53,7 +47,6 @@ def main():
     cap.set(4, constants.CAM_HEIGHT)
     cap.set(10, constants.CAM_BRIGHTNESS)
     #cap.set(15, constants.CAM_EXPOSURE)
-    logging.basicConfig(level=logging.DEBUG)
 
     #NetworkTable.setIPAddress('10.32.56.18')
     #NetworkTable.setClientMode()
