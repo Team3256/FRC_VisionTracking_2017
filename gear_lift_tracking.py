@@ -3,6 +3,8 @@
 import cv2
 import numpy as np
 import constants
+import logging
+from networktables import NetworkTables
 
 def get_center(contour):
     #get moments data from contour
@@ -48,15 +50,16 @@ def main():
     cap.set(10, constants.CAM_BRIGHTNESS)
     #cap.set(15, constants.CAM_EXPOSURE)
 
-    #NetworkTable.setIPAddress('10.32.56.18')
-    #NetworkTable.setClientMode()
-    #NetworkTable.initialize()
+    logging.basicConfig(level=logging.DEBUG)
 
-    #nt = NetworkTable.getTable('SmartDashboard')
-
-    while cap.isOpened():
-
-        frame=cv2.imread("/home/ubuntu/Documents/Vision Images/LED Peg/1ftH5ftD0Angle0Brightness.jpg")
+    NetworkTables.setIPAddress('10.32.56.79')
+    NetworkTables.setClientMode()
+    NetworkTables.initialize()
+    nt = NetworkTables.getTable('SmartDashboard')
+    #while cap.isOpened():
+    while True:
+        nt.putNumber('testing', 3) 
+        frame=cv2.imread("/home/ubuntu/Pictures/Webcam/_18inches.jpg")
         #converts bgr vals of image to hsv
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         #Range for green light reflected off of the tape. Need to tune.
@@ -67,6 +70,7 @@ def main():
         mask = cv2.inRange(hsv, lower_green, upper_green)
         #Gets contours of the thresholded image.
         contours, hierarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_TC89_KCOS)
+
         #Draw the contours around detected object
         #cv2.drawContours(frame, contours, -1, (0,0,255), 3)
 
@@ -74,7 +78,11 @@ def main():
         #Check to see if contours were found.
         if len(contours)>0:
             #find largest contour
-            cnt = max(contours, key=cv2.contourArea)	
+            cnt = max(contours, key=cv2.contourArea)
+
+	    x, y, w, h = cv2.boundingRect(cnt)
+	    cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
+	    print w
 	    
 	    i = 0
 	    while i < len(contours):
@@ -95,12 +103,13 @@ def main():
 
 	    # Midpoint between two centers
 	    midpoint = (int((center[0] + center2[0]) / 2), int((center[1] + center2[1]) / 2))
-	    cv2.circle(frame, midpoint, 3, (0, 0, 255), 2)
+	    cv2.circle(frame, midpoint, 5, (0, 0, 255), 2)
+	    
 
         #show image
-        cv2.imshow('frame',frame)
-        cv2.imshow('mask', mask)
-        cv2.imshow('HSV', hsv)
+        #cv2.imshow('frame',frame)
+        #cv2.imshow('mask', mask)
+        #cv2.imshow('HSV', hsv)
 
         #close if delay in camera feed is too long
         k = cv2.waitKey(1) & 0xFF
