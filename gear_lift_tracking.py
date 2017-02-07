@@ -5,6 +5,7 @@ import numpy as np
 import constants
 import logging
 from networktables import NetworkTables
+import random
 
 def get_center(contour):
     #get moments data from contour
@@ -48,18 +49,23 @@ def main():
     cap.set(3, constants.CAM_WIDTH)
     cap.set(4, constants.CAM_HEIGHT)
     cap.set(10, constants.CAM_BRIGHTNESS)
-    #cap.set(15, constants.CAM_EXPOSURE)
+    cap.set(15, constants.CAM_EXPOSURE)
 
     logging.basicConfig(level=logging.DEBUG)
 
-    NetworkTables.setIPAddress('10.32.56.79')
+    NetworkTables.setIPAddress('10.32.56.2')
     NetworkTables.setClientMode()
     NetworkTables.initialize()
     nt = NetworkTables.getTable('SmartDashboard')
     #while cap.isOpened():
     while True:
-        nt.putNumber('testing', 3) 
-        frame=cv2.imread("/home/ubuntu/Pictures/Webcam/_18inches.jpg")
+        nt.putNumber('testing', random.randint(1, 100))
+	print NetworkTables.isConnected()
+	print nt.getNumber('gyro',0)
+	print nt.getNumber('dt',0)
+        #_,frame=cap.read()
+	frame = cv2.imread('/home/ubuntu/FRC_VisionTracking_2017/LED Peg/1ftH2ftD2Angle0Brightness.jpg')
+	nt.putRaw('frame', bytearray(frame.tostring()))
         #converts bgr vals of image to hsv
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         #Range for green light reflected off of the tape. Need to tune.
@@ -80,10 +86,6 @@ def main():
             #find largest contour
             cnt = max(contours, key=cv2.contourArea)
 
-	    x, y, w, h = cv2.boundingRect(cnt)
-	    cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
-	    print w
-	    
 	    i = 0
 	    while i < len(contours):
 		if np.array_equal(contours[i], cnt):
