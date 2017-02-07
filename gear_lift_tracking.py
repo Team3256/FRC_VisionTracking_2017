@@ -63,8 +63,8 @@ def main():
 	print NetworkTables.isConnected()
 	print nt.getNumber('gyro',0)
 	print nt.getNumber('dt',0)
-        #_,frame=cap.read()
-	frame = cv2.imread('/home/ubuntu/FRC_VisionTracking_2017/LED Peg/1ftH2ftD2Angle0Brightness.jpg')
+        _,frame=cap.read()
+	#frame = cv2.imread('/home/ubuntu/FRC_VisionTracking_2017/LED Peg/1ftH2ftD2Angle0Brightness.jpg')
 	nt.putRaw('frame', bytearray(frame.tostring()))
         #converts bgr vals of image to hsv
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
