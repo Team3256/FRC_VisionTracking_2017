@@ -59,6 +59,7 @@ def main():
     NetworkTables.setIPAddress('10.32.54.59')
     NetworkTables.setClientMode()
     NetworkTables.initialize()
+    fps = 20
     nt = NetworkTables.getTable('SmartDashboard')
     start_time = time.time()
     #while cap.isOpened():
@@ -68,11 +69,10 @@ def main():
 	#print nt.getNumber('gyro',0)
 	#print nt.getNumber('dt',0)
         _,frame=cap.read()
-        fps = 15
-        if time.time() - start_time >= 1.0/fps:
+        if time.time() - start_time >= 1.0/fps: 
             imgArray = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            #imgArray = cv2.resize(imgArray, (320, 240), cv2.INTER_AREA)
             jpg = Image.fromarray(imgArray)
+            jpg = jpg.resize((320, 240))
             tempFile = BytesIO()
             jpg.save(tempFile, 'JPEG')
             print str(round(float(len(tempFile.getvalue())) / 1024, 3)) + ' KB'
