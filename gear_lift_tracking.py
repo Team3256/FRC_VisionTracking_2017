@@ -56,11 +56,12 @@ def main():
 
     logging.basicConfig(level=logging.DEBUG)
 
-    NetworkTables.setIPAddress('10.32.54.59')
+    NetworkTables.setIPAddress('10.32.56.108')
     NetworkTables.setClientMode()
     NetworkTables.initialize()
-    fps = 20
+    fps = 15
     nt = NetworkTables.getTable('SmartDashboard')
+    imageTable = NetworkTables.getTable('Image')
     start_time = time.time()
     #while cap.isOpened():
     while True:
@@ -69,14 +70,14 @@ def main():
 	#print nt.getNumber('gyro',0)
 	#print nt.getNumber('dt',0)
         _,frame=cap.read()
-        if time.time() - start_time >= 1.0/fps: 
+        if time.time() - start_time >= 1.0/fps:
             imgArray = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             jpg = Image.fromarray(imgArray)
             jpg = jpg.resize((320, 240))
             tempFile = BytesIO()
             jpg.save(tempFile, 'JPEG')
             print str(round(float(len(tempFile.getvalue())) / 1024, 3)) + ' KB'
-            nt.putRaw('image', tempFile.getvalue())
+            imageTable.putRaw('image', tempFile.getvalue())
             start_time = time.time()
 	#frame = cv2.imread('/home/ubuntu/FRC_VisionTracking_2017/LED Peg/1ftH2ftD2Angle0Brightness.jpg')
         #converts bgr vals of image to hsv
