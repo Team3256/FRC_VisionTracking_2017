@@ -9,6 +9,7 @@ import random
 import Image
 from io import BytesIO
 import time
+import math
 
 def get_center(contour):
     #get moments data from contour
@@ -56,30 +57,19 @@ def main():
 
     logging.basicConfig(level=logging.DEBUG)
 
-    NetworkTables.setIPAddress('10.32.56.108')
+    NetworkTables.setIPAddress('172.17.14.35')
     NetworkTables.setClientMode()
     NetworkTables.initialize()
-    fps = 15
+    fps = 20
     nt = NetworkTables.getTable('SmartDashboard')
     imageTable = NetworkTables.getTable('Image')
     start_time = time.time()
-    #while cap.isOpened():
-    while True:
+    while cap.isOpened():
         nt.putNumber('testing', random.randint(1, 100))
-	#print NetworkTables.isConnected()
 	#print nt.getNumber('gyro',0)
 	#print nt.getNumber('dt',0)
         _,frame=cap.read()
-        if time.time() - start_time >= 1.0/fps:
-            imgArray = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            jpg = Image.fromarray(imgArray)
-            jpg = jpg.resize((320, 240))
-            tempFile = BytesIO()
-            jpg.save(tempFile, 'JPEG')
-            print str(round(float(len(tempFile.getvalue())) / 1024, 3)) + ' KB'
-            imageTable.putRaw('image', tempFile.getvalue())
-            start_time = time.time()
-	#frame = cv2.imread('/home/ubuntu/FRC_VisionTracking_2017/LED Peg/1ftH2ftD2Angle0Brightness.jpg')
+        #frame = cv2.imread('/home/ubuntu/FRC_VisionTracking_2017/LED Peg/1ftH2ftD2Angle0Brightness.jpg')
         #converts bgr vals of image to hsv
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         #Range for green light reflected off of the tape. Need to tune.
@@ -92,12 +82,10 @@ def main():
         contours, hierarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_TC89_KCOS)
 
         #Draw the contours around detected object
-        #cv2.drawContours(frame, contours, -1, (0,0,255), 3)
-
+        cv2.drawContours(frame, contours, -1, (0,0,255), 3)
         #Get centroid of tracked object.
         #Check to see if contours were found.
-        #if len(contours)>0:
-	if False:        
+        if len(contours)>0:   
 	    #find largest contour
             cnt = max(contours, key=cv2.contourArea)
 
@@ -108,20 +96,32 @@ def main():
 		
 		i += 1
 
-	    # Find second largest contour
-	    cnt2 = max(contours, key=cv2.contourArea)
-
             #get center
             center = get_center(cnt)
-            cv2.circle(frame, center, 3, (0,0,255), 2)
 
-	    center2 = get_center(cnt2)
-	    cv2.circle(frame, center2, 3, (0, 0, 255), 2)
+            if contours != []:
+	            # Find second largest contour
+	            cnt2 = max(contours, key=cv2.contourArea)
 
-	    # Midpoint between two centers
-	    midpoint = (int((center[0] + center2[0]) / 2), int((center[1] + center2[1]) / 2))
-	    cv2.circle(frame, midpoint, 5, (0, 0, 255), 2)
-	    
+	            center2 = get_center(cnt2)
+
+                    center_x = int((center[0] + center2[0]) / 2)
+                    center_y = int((center[1] + center2[1]) / 2)
+	            # Midpoint between two centers
+	            midpoint = (center_x, center_y)
+	            cv2.circle(frame, midpoint, 5, (0, 0, 255), 2)
+                    cv2.putText(frame, str(get_offset_angle(center_x, center_y)), (5, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+
+	#if True:    
+        if time.time() - start_time >= 1.0/fps:
+            imgArray = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            jpg = Image.fromarray(imgArray)
+            #jpg = jpg.resize((480, 360))
+            tempFile = BytesIO()
+            jpg.save(tempFile, 'JPEG')
+            #print str(round(float(len(tempFile.getvalue())) / 1024, 3)) + ' KB'
+            imageTable.putRaw('image', tempFile.getvalue())
+            start_time = time.time()
 
         #show image
         #cv2.imshow('frame',frame)
