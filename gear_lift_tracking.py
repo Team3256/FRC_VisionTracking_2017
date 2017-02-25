@@ -82,7 +82,7 @@ def main():
         contours, hierarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_TC89_KCOS)
 
         #Draw the contours around detected object
-        cv2.drawContours(frame, contours, -1, (0,0,255), 3)
+        #cv2.drawContours(frame, contours, -1, (0,0,255), 3)
         #Get centroid of tracked object.
         #Check to see if contours were found.
         if len(contours)>0:   
@@ -92,6 +92,7 @@ def main():
 	    i = 0
 	    while i < len(contours):
 		if np.array_equal(contours[i], cnt):
+                        cv2.drawContours(frame, contours, i, (0, 0, 255), 3)
 			contours.pop(i)
 		
 		i += 1
@@ -102,7 +103,11 @@ def main():
             if contours != []:
 	            # Find second largest contour
 	            cnt2 = max(contours, key=cv2.contourArea)
-
+                    i = 0
+	            while i < len(contours):
+		        if np.array_equal(contours[i], cnt2):
+                                cv2.drawContours(frame, contours, i, (0, 0, 255), 3)
+		        i += 1
 	            center2 = get_center(cnt2)
 
                     center_x = int((center[0] + center2[0]) / 2)
@@ -124,7 +129,7 @@ def main():
             start_time = time.time()
 
         #show image
-        #cv2.imshow('frame',frame)
+        cv2.imshow('frame',frame)
         #cv2.imshow('mask', mask)
         #cv2.imshow('HSV', hsv)
 
