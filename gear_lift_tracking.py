@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 import cv2
 import numpy as np
 import constants
@@ -47,8 +46,7 @@ def get_offset_angle(center_x, center_y):
     return (degrees, direction)
 
 def main():
-    cap = cv2.VideoCapture(0)
-
+    cap = cv2.VideoCapture(-1)
     #Set camera values
     cap.set(3, constants.CAM_WIDTH)
     cap.set(4, constants.CAM_HEIGHT)
@@ -79,10 +77,14 @@ def main():
         #Threshold the HSV image to only get the green color.
         mask = cv2.inRange(hsv, lower_green, upper_green)
         #Gets contours of the thresholded image.
-        contours, hierarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_TC89_KCOS)
-        contours = [x for x in contours if cv2.contourArea(x) >= constants.MIN_CONTOUR_AREA]
-        for x in contours:
-            print cv2.contourArea(x)
+        contours_unfiltered, hierarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_TC89_KCOS)
+        contours_unfiltered = [x for x in contours_unfiltered if cv2.contourArea(x) >= constants.MIN_CONTOUR_AREA]
+        contours = []
+        for contour in contours_unfiltered:
+            epsilon = 0.1*cv2.arcLength(contour, True)
+            approx_contour = cv2.approxPolyDP(contour, epsilon, True)
+            if len(approx_contour) == 4:
+                contours.append(contour)
         #Draw the contours around detected object
         cv2.drawContours(frame, contours, -1, (0,0,255), 3)
         #Get centroid of tracked object.
