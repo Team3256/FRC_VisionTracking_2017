@@ -4,7 +4,8 @@ import math
 #This is the constants file that has all of the important constants for the tracker.
 
 #Driver Station
-DRIVER_STATION_IP = '172.17.14.35'
+ROBORIO_IP = 'roboRIO-3256-frc.local'
+DRIVER_STATION_IP = '172.17.15.129'
 
 #Camera Constants
 CAM_EXPOSURE = 0.01

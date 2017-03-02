@@ -55,17 +55,16 @@ def main():
 
     logging.basicConfig(level=logging.DEBUG)
 
-    NetworkTables.setIPAddress(constants.DRIVER_STATION_IP)
+    NetworkTables.setIPAddress(constants.ROBORIO_IP)
     NetworkTables.setClientMode()
     NetworkTables.initialize()
     fps = 20
     nt = NetworkTables.getTable('SmartDashboard')
-    imageTable = NetworkTables.getTable('Image')
     start_time = time.time()
     while cap.isOpened():
         nt.putNumber('testing', random.randint(1, 100))
-	#print nt.getNumber('gyro',0)
-	#print nt.getNumber('dt',0)
+        #print nt.getNumber('gyro',0)
+        #print nt.getNumber('dt',0)
         _,frame=cap.read()
         #frame = cv2.imread('/home/ubuntu/FRC_VisionTracking_2017/LED Peg/1ftH2ftD2Angle0Brightness.jpg')
         #converts bgr vals of image to hsv
@@ -90,51 +89,49 @@ def main():
         #Get centroid of tracked object.
         #Check to see if contours were found.
         if len(contours)>0:   
-	    #find largest contour
+        #find largest contour
             cnt = max(contours, key=cv2.contourArea)
 
-	    i = 0
-	    while i < len(contours):
-		if np.array_equal(contours[i], cnt):
-                        cv2.drawContours(frame, contours, i, (0, 255, 255), 3)
-			contours.pop(i)
-		
-		i += 1
+            i = 0
+            while i < len(contours):
+                if np.array_equal(contours[i], cnt):
+                    cv2.drawContours(frame, contours, i, (0, 255, 255), 3)
+                    contours.pop(i)
+                i += 1
 
             #get center
             center = get_center(cnt)
 
             if contours != []:
-	            # Find second largest contour
-	            cnt2 = max(contours, key=cv2.contourArea)
-                    i = 0
-	            while i < len(contours):
-		        if np.array_equal(contours[i], cnt2):
-                                cv2.drawContours(frame, contours, i, (0, 255, 255), 3)
-		        i += 1
-	            center2 = get_center(cnt2)
+                # Find second largest contour
+                cnt2 = max(contours, key=cv2.contourArea)
+                i = 0
+                while i < len(contours):
+                    if np.array_equal(contours[i], cnt2):
+                        cv2.drawContours(frame, contours, i, (0, 255, 255), 3)
+                    i += 1
+                center2 = get_center(cnt2)
 
-                    center_x = int((center[0] + center2[0]) / 2)
-                    center_y = int((center[1] + center2[1]) / 2)
-	            # Midpoint between two centers
-	            midpoint = (center_x, center_y)
-	            cv2.circle(frame, midpoint, 5, (0, 255, 255), 2)
-                    angle = get_offset_angle(center_x, center_y)
-                    angleStr = str(round(angle[0], 2))
-                    cv2.putText(frame, 'Angle: ' + angleStr, constants.TEXT_COORDINATE_1, cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
-                    cv2.circle(frame, (144 + 12 * (len(angleStr) - 5), 4), 3, (0, 255, 255), 2)
-                    cv2.putText(frame, 'Direction: ' + angle[1], constants.TEXT_COORDINATE_2, cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
+                center_x = int((center[0] + center2[0]) / 2)
+                center_y = int((center[1] + center2[1]) / 2)
+                # Midpoint between two centers
+                midpoint = (center_x, center_y)
+                cv2.circle(frame, midpoint, 5, (0, 255, 255), 2)
+                angle = get_offset_angle(center_x, center_y)
+                angleStr = str(round(angle[0], 2))
+                print(angleStr)
+                nt.putNumber('gyro', angle[0])
+                cv2.putText(frame, 'Angle: ' + angleStr, constants.TEXT_COORDINATE_1, cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
+                cv2.circle(frame, (144 + 12 * (len(angleStr) - 5), 4), 3, (0, 255, 255), 2)
+                cv2.putText(frame, 'Direction: ' + angle[1], constants.TEXT_COORDINATE_2, cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
 
-	#if False:    
-        if time.time() - start_time >= 1.0/fps:
-            imgArray = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            jpg = Image.fromarray(imgArray)
-            jpg = jpg.resize((480, 360))
-            tempFile = BytesIO()
-            jpg.save(tempFile, 'JPEG')
-            #print str(round(float(len(tempFile.getvalue())) / 1024, 3)) + ' KB'
-            imageTable.putRaw('image', tempFile.getvalue())
-            start_time = time.time()
+        imgArray = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        jpg = Image.fromarray(imgArray)
+        jpg = jpg.resize((480, 360))
+        tempFile = BytesIO()
+        jpg.save('temp.jpg')
+        #print str(round(float(len(tempFile.getvalue())) / 1024, 3)) + ' KB'
+        start_time = time.time()
 
         #show image
         cv2.imshow('frame',frame)
