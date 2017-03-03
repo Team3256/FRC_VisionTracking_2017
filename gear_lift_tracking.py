@@ -6,7 +6,6 @@ import logging
 from networktables import NetworkTables
 import random
 import Image
-from io import BytesIO
 import time
 import math
 
@@ -58,92 +57,94 @@ def main():
     NetworkTables.setIPAddress(constants.ROBORIO_IP)
     NetworkTables.setClientMode()
     NetworkTables.initialize()
-    fps = 20
     nt = NetworkTables.getTable('SmartDashboard')
     start_time = time.time()
     while cap.isOpened():
-        nt.putNumber('testing', random.randint(1, 100))
-        #print nt.getNumber('gyro',0)
-        #print nt.getNumber('dt',0)
-        _,frame=cap.read()
-        #frame = cv2.imread('/home/ubuntu/FRC_VisionTracking_2017/LED Peg/1ftH2ftD2Angle0Brightness.jpg')
-        #converts bgr vals of image to hsv
-        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-        #Range for green light reflected off of the tape. Need to tune.
-        lower_green = np.array(constants.LOWER_GREEN, dtype=np.uint8)
-        upper_green = np.array(constants.UPPER_GREEN, dtype=np.uint8)
+        try:
+            nt.putNumber('testing', random.randint(1, 100))
+            #print nt.getNumber('gyro',0)
+            #print nt.getNumber('dt',0)
+            _,frame=cap.read()
+            #frame = cv2.imread('/home/ubuntu/FRC_VisionTracking_2017/LED Peg/1ftH2ftD2Angle0Brightness.jpg')
+            #converts bgr vals of image to hsv
+            hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+            #Range for green light reflected off of the tape. Need to tune.
+            lower_green = np.array(constants.LOWER_GREEN, dtype=np.uint8)
+            upper_green = np.array(constants.UPPER_GREEN, dtype=np.uint8)
 
-        #Threshold the HSV image to only get the green color.
-        mask = cv2.inRange(hsv, lower_green, upper_green)
-        #Gets contours of the thresholded image.
-        contours_unfiltered, hierarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_TC89_KCOS)
-        contours_unfiltered = [x for x in contours_unfiltered if cv2.contourArea(x) >= constants.MIN_CONTOUR_AREA]
-        contours = []
-        for contour in contours_unfiltered:
-            epsilon = 0.1*cv2.arcLength(contour, True)
-            approx_contour = cv2.approxPolyDP(contour, epsilon, True)
-            if len(approx_contour) == 4:
-                contours.append(contour)
-        #Draw the contours around detected object
-        cv2.drawContours(frame, contours, -1, (0,0,255), 3)
-        #Get centroid of tracked object.
-        #Check to see if contours were found.
-        if len(contours)>0:   
-        #find largest contour
-            cnt = max(contours, key=cv2.contourArea)
+            #Threshold the HSV image to only get the green color.
+            mask = cv2.inRange(hsv, lower_green, upper_green)
+            #Gets contours of the thresholded image.
+            contours_fullres, hierarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_TC89_KCOS)
+            contours_fullres = [x for x in contours_fullres if cv2.contourArea(x) >= constants.MIN_CONTOUR_AREA]
+            contours = []
+            for contour in contours_fullres:
+                epsilon = 0.1*cv2.arcLength(contour, True)
+                approx_contour = cv2.approxPolyDP(contour, epsilon, True)
+                if len(approx_contour) == 4:
+                    contours.append(approx_contour)
+            #Draw the contours around detected object
+            cv2.drawContours(frame, contours, -1, (0,0,255), 3)
+            #Get centroid of tracked object.
+            #Check to see if contours were found.
+            if len(contours)>0:   
+            #find largest contour
+                cnt = max(contours, key=cv2.contourArea)
 
-            i = 0
-            while i < len(contours):
-                if np.array_equal(contours[i], cnt):
-                    cv2.drawContours(frame, contours, i, (0, 255, 255), 3)
-                    contours.pop(i)
-                i += 1
-
-            #get center
-            center = get_center(cnt)
-
-            if contours != []:
-                # Find second largest contour
-                cnt2 = max(contours, key=cv2.contourArea)
                 i = 0
                 while i < len(contours):
-                    if np.array_equal(contours[i], cnt2):
+                    if np.array_equal(contours[i], cnt):
                         cv2.drawContours(frame, contours, i, (0, 255, 255), 3)
+                        contours.pop(i)
                     i += 1
-                center2 = get_center(cnt2)
 
-                center_x = int((center[0] + center2[0]) / 2)
-                center_y = int((center[1] + center2[1]) / 2)
-                # Midpoint between two centers
-                midpoint = (center_x, center_y)
-                cv2.circle(frame, midpoint, 5, (0, 255, 255), 2)
-                angle = get_offset_angle(center_x, center_y)
-                angleStr = str(round(angle[0], 2))
-                print(angleStr)
-                nt.putNumber('gyro', angle[0])
-                cv2.putText(frame, 'Angle: ' + angleStr, constants.TEXT_COORDINATE_1, cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
-                cv2.circle(frame, (144 + 12 * (len(angleStr) - 5), 4), 3, (0, 255, 255), 2)
-                cv2.putText(frame, 'Direction: ' + angle[1], constants.TEXT_COORDINATE_2, cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
+                #get center
+                center = get_center(cnt)
 
-        imgArray = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        jpg = Image.fromarray(imgArray)
-        jpg = jpg.resize((480, 360))
-        tempFile = BytesIO()
-        jpg.save('temp.jpg')
-        #print str(round(float(len(tempFile.getvalue())) / 1024, 3)) + ' KB'
-        start_time = time.time()
+                if contours != []:
+                    # Find second largest contour
+                    cnt2 = max(contours, key=cv2.contourArea)
+                    i = 0
+                    while i < len(contours):
+                        if np.array_equal(contours[i], cnt2):
+                            cv2.drawContours(frame, contours, i, (0, 255, 255), 3)
+                        i += 1
+                    center2 = get_center(cnt2)
 
-        #show image
-        cv2.imshow('frame',frame)
-        #cv2.imshow('mask', mask)
-        #cv2.imshow('HSV', hsv)
+                    center_x = int((center[0] + center2[0]) / 2)
+                    center_y = int((center[1] + center2[1]) / 2)
+                    # Midpoint between two centers
+                    midpoint = (center_x, center_y)
+                    cv2.circle(frame, midpoint, 5, (0, 255, 255), 2)
+                    angle = get_offset_angle(center_x, center_y)
+                    angleStr = str(round(angle[0], 2))
+                    nt.putNumber('gyro', angle[0])
+                    cv2.putText(frame, 'Angle: ' + angleStr, constants.TEXT_COORDINATE_1, cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
+                    cv2.circle(frame, (144 + 12 * (len(angleStr) - 5), 4), 3, (0, 255, 255), 2)
+                    cv2.putText(frame, 'Direction: ' + angle[1], constants.TEXT_COORDINATE_2, cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
 
-        #close if delay in camera feed is too long
-        k = cv2.waitKey(1) & 0xFF
-        if k == 27:
-            break
+            if time.time() - start_time >= 1.0/constants.FPS:
+                start_time = time.time()
+                imgArray = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                jpg = Image.fromarray(imgArray)
+                jpg = jpg.resize((480, 360))
+                jpg.save('frame.jpg')
+                start_time = time.time()
 
-    cv2.destroyAllWindows()
+            #show image
+            #cv2.imshow('frame',frame)
+            #cv2.imshow('mask', mask)
+            #cv2.imshow('HSV', hsv)
+
+            #close if delay in camera feed is too long
+            k = cv2.waitKey(20) & 0xFF
+            if k == 27:
+                break
+        except Exception as e:
+            print(e)
+            continue
+
+    #cv2.destroyAllWindows()
 
 if __name__ == '__main__':
     #runs main
