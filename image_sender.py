@@ -3,6 +3,7 @@ import constants
 import Image
 import hashlib
 from io import BytesIO
+import time
 
 def get_image_hash():
     hasher = hashlib.md5()
@@ -27,6 +28,7 @@ def main():
                 continue
             table.putRaw('image', bytes)
             #print(str(round(float(len(bytes)) / 1024, 3)) + ' KB')
+        time.sleep(0.02)
 
 if __name__ == '__main__':
     main()

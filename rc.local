@@ -1,0 +1,2 @@
+#!/bin/sh -e
+sh '/home/ubuntu/FRC_VisionTracking_2017/start_vision_tracking.sh' &

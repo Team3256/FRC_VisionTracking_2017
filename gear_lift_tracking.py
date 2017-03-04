@@ -21,6 +21,19 @@ def get_center(contour):
         #return a tuple with center coordinates
         center = (center_x, center_y)
     return center
+    
+def get_delta_x(x):
+    #get moments data from contour
+    moments = cv2.moments(contour)
+    #get center x and y value from image
+    center = (0,0)
+
+    if moments["m00"] > 0:
+        center_x = int(moments["m10"]/moments["m00"])
+        center_y = int(moments["m01"]/moments["m00"])
+        #return a tuple with center coordinates
+        center = (center_x, center_y)
+    return center
 
 def get_delta_x(x):
     #returns difference of X value of center of the tracked object to the targets X value
@@ -47,9 +60,9 @@ def get_offset_angle(center_x, center_y):
 def main():
     cap = cv2.VideoCapture(-1)
     #Set camera values
-    cap.set(3, constants.CAM_WIDTH)
-    cap.set(4, constants.CAM_HEIGHT)
-    cap.set(10, constants.CAM_BRIGHTNESS)
+    cap.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, constants.CAM_WIDTH)
+    cap.set(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, constants.CAM_HEIGHT)
+    cap.set(cv2.cv.CV_CAP_PROP_BRIGHTNESS, constants.CAM_BRIGHTNESS)
     #cap.set(15, constants.CAM_EXPOSURE)
 
     logging.basicConfig(level=logging.DEBUG)
@@ -115,7 +128,7 @@ def main():
                     center_y = int((center[1] + center2[1]) / 2)
                     # Midpoint between two centers
                     midpoint = (center_x, center_y)
-                    cv2.circle(frame, midpoint, 5, (0, 255, 255), 2)
+                    cv2.circle(frame, midpoint, 5, (0, 255, 255 ), 2)
                     angle = get_offset_angle(center_x, center_y)
                     angleStr = str(round(angle[0], 2))
                     nt.putNumber('gyro', angle[0])
@@ -137,7 +150,7 @@ def main():
             #cv2.imshow('HSV', hsv)
 
             #close if delay in camera feed is too long
-            k = cv2.waitKey(20) & 0xFF
+            k = cv2.waitKey(30) & 0xFF
             if k == 27:
                 break
         except Exception as e:
