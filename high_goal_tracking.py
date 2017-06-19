@@ -61,7 +61,7 @@ def get_distance_from_cam(pixel_width):
 	
 	
 def main():
-    cap = cv2.VideoCapture(1)
+    cap = cv2.VideoCapture(0)
     #Set camera values
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, constants.CAM_WIDTH)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, constants.CAM_HEIGHT)
@@ -134,8 +134,9 @@ def main():
                 rightmost = tuple(cnt[cnt[:,:,0].argmax()][0])
                 pixel_width = rightmost[0]-leftmost[0]
                 distance_away = get_distance_from_cam(pixel_width)
-                cv2.putText(frame, str(pixel_width), leftmost, cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
-                cv2.putText(frame, str(distance_away), rightmost, cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
+				
+                cv2.putText(frame, "Pixel Width: " + str(pixel_width), constants.TEXT_COORDINATE_3, cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
+                cv2.putText(frame, "Distance: " + str(distance_away), constants.TEXT_COORDINATE_4, cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
                 #nt.putNumber('gyro', angle[0])
                 cv2.putText(frame, 'Angle: ' + angleStr, constants.TEXT_COORDINATE_1, cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
                 cv2.circle(frame, (144 + 12 * (len(angleStr) - 5), 4), 3, (0, 255, 255), 2)
