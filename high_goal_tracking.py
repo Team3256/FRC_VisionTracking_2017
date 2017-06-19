@@ -57,7 +57,8 @@ def get_offset_angle(center_x, center_y):
 
 	
 def get_distance_from_cam(pixel_width):
-	return constants.GOAL_WIDTH*constants.FOCAL_LENGTH/pixel_width
+    # Return distance from camera in inches
+	return constants.GOAL_WIDTH * constants.FOCAL_LENGTH / pixel_width
 	
 	
 def main():
@@ -130,9 +131,12 @@ def main():
                 center_y = int((center[1] + center2[1]) / 2)'''
                 angle = get_offset_angle(center[0], center[1])
                 angleStr = str(round(angle[0], 2))
-                leftmost = tuple(cnt[cnt[:,:,0].argmin()][0])
+				
+                # Calculate the width of the contour in pixels
+				leftmost = tuple(cnt[cnt[:,:,0].argmin()][0])
                 rightmost = tuple(cnt[cnt[:,:,0].argmax()][0])
-                pixel_width = rightmost[0]-leftmost[0]
+				pixel_width = rightmost[0] - leftmost[0]
+				
                 distance_away = get_distance_from_cam(pixel_width)
 				
                 cv2.putText(frame, "Pixel Width: " + str(pixel_width), constants.TEXT_COORDINATE_3, cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
