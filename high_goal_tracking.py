@@ -55,8 +55,13 @@ def get_offset_angle(center_x, center_y):
 
     return (degrees, direction)
 
+	
+def get_distance_from_cam(pixel_width):
+	return constants.GOAL_WIDTH*constants.FOCAL_LENGTH/pixel_width
+	
+	
 def main():
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(1)
     #Set camera values
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, constants.CAM_WIDTH)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, constants.CAM_HEIGHT)
@@ -74,8 +79,8 @@ def main():
             #nt.putNumber('testing', random.randint(1, 100))
             #print nt.getNumber('gyro',0)
             #print nt.getNumber('dt',0)
-            #_,frame=cap.read()
-            frame = cv2.imread('C:\\Users\\Team 3256\\Desktop\\high goal tracking\\test pics\\j (33).jpg')
+            _,frame=cap.read()
+            #frame = cv2.imread('C:\\Users\\Team 3256\\Desktop\\high goal tracking\\test pics\\j (33).jpg')
             #cv2.rectangle(frame, (0, 240), (640, 480), (0, 0, 0), 150)
             #converts bgr vals of image to hsv
             hsv = cv2.cvtColor(frame, cv2.COLOR_RGB2HSV)
@@ -125,6 +130,12 @@ def main():
                 center_y = int((center[1] + center2[1]) / 2)'''
                 angle = get_offset_angle(center[0], center[1])
                 angleStr = str(round(angle[0], 2))
+                leftmost = tuple(cnt[cnt[:,:,0].argmin()][0])
+                rightmost = tuple(cnt[cnt[:,:,0].argmax()][0])
+                pixel_width = rightmost[0]-leftmost[0]
+                distance_away = get_distance_from_cam(pixel_width)
+                cv2.putText(frame, str(pixel_width), leftmost, cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
+                cv2.putText(frame, str(distance_away), rightmost, cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
                 #nt.putNumber('gyro', angle[0])
                 cv2.putText(frame, 'Angle: ' + angleStr, constants.TEXT_COORDINATE_1, cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
                 cv2.circle(frame, (144 + 12 * (len(angleStr) - 5), 4), 3, (0, 255, 255), 2)

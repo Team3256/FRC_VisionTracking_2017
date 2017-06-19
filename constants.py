@@ -36,6 +36,8 @@ TEXT_COORDINATE_5=(1,130)
 #Camera Angles and Distances
 HORIZ_FIELD_OF_VIEW=61 #angle in degrees
 DIST_CAM_TO_CENTER= 543.252198
+FOCAL_LENGTH = 661.53
+GOAL_WIDTH= 7.8 #target goal width in inches
 
 #Trig Data
 RADIAN_TO_DEGREE = float(180.0/math.pi)
