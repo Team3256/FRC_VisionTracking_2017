@@ -59,7 +59,7 @@ def get_offset_angle(center_x, center_y):
 	
 def get_distance_from_cam(pixel_width):
     # Return distance from camera in inches
-	return constants.GOAL_WIDTH * constants.FOCAL_LENGTH / pixel_width
+    return constants.GOAL_WIDTH * constants.FOCAL_LENGTH / pixel_width
 	
 	
 def main():
@@ -115,22 +115,7 @@ def main():
                 #get center
                 center = get_center(cnt)
 
-                if contours != []:
-                    # Find second largest contour
-                   ''' cnt2 = max(contours, key=cv2.contourArea)
-                    i = 0
-                    while i < len(contours):
-                        if np.array_equal(contours[i], cnt2):
-                            cv2.drawContours(frame, contours, i, (0, 255, 255), 3)
-                        i += 1
-                    center2 = get_center(cnt2)
-
-                    
-                    # Midpoint between two centers
-                    midpoint = (center_x, center_y)
-                    cv2.circle(frame, midpoint, 5, (0, 255, 255 ), 2)
-                center_x = int((center[0] + center2[0]) / 2)
-                center_y = int((center[1] + center2[1]) / 2)'''
+                
                 angle = get_offset_angle(center[0], center[1])
                 angleStr = str(round(angle[0], 2))
 				
