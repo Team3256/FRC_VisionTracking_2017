@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import os
 import cv2
 import numpy as np
 import constants
@@ -62,11 +63,12 @@ def get_distance_from_cam(pixel_width):
 	
 	
 def main():
-    cap = cv2.VideoCapture(0)
+    os.system('v4l2-ctl -c exposure_auto=1 -c exposure_absolute=1 -d /dev/video1')
+    cap = cv2.VideoCapture(1)
     #Set camera values
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, constants.CAM_WIDTH)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, constants.CAM_HEIGHT)
-    cap.set(cv2.CAP_PROP_BRIGHTNESS, constants.CAM_BRIGHTNESS)
+    cap.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, constants.CAM_WIDTH)
+    cap.set(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, constants.CAM_HEIGHT)
+    cap.set(cv2.cv.CV_CAP_PROP_BRIGHTNESS, constants.CAM_BRIGHTNESS)
     #cap.set(15, constants.CAM_EXPOSURE)
 
     logging.basicConfig(level=logging.DEBUG)
@@ -92,7 +94,7 @@ def main():
             #Threshold the HSV image to only get the green color.
             mask = cv2.inRange(hsv, lower_green, upper_green)
             #Gets contours of the thresholded image.
-            _, contours, hierarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_TC89_KCOS)
+            contours, hierarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_TC89_KCOS)
             contours = [x for x in contours if cv2.contourArea(x) >= constants.MIN_CONTOUR_AREA]
             #Draw the contours around detected object
             cv2.drawContours(frame, contours, -1, (0,0,255), 3)
@@ -133,9 +135,9 @@ def main():
                 angleStr = str(round(angle[0], 2))
 				
                 # Calculate the width of the contour in pixels
-				leftmost = tuple(cnt[cnt[:,:,0].argmin()][0])
+		leftmost = tuple(cnt[cnt[:,:,0].argmin()][0])
                 rightmost = tuple(cnt[cnt[:,:,0].argmax()][0])
-				pixel_width = rightmost[0] - leftmost[0]
+		pixel_width = rightmost[0] - leftmost[0]
 				
                 distance_away = get_distance_from_cam(pixel_width)
 				
