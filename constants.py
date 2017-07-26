@@ -17,7 +17,7 @@ CAM_WIDTH = 640
 CAM_HEIGHT = 480
 
 #Threshold values
-LOWER_GREEN = [0,70,70]
+LOWER_GREEN = [0,50,50]
 UPPER_GREEN = [70,255,255]
 MIN_CONTOUR_AREA = 150
 
@@ -36,8 +36,8 @@ TEXT_COORDINATE_5=(1,130)
 #Camera Angles and Distances
 HORIZ_FIELD_OF_VIEW=61 #angle in degrees
 DIST_CAM_TO_CENTER= 543.252198
-FOCAL_LENGTH = 661.53
-GOAL_WIDTH= 7.8 #target goal width in inches
+FOCAL_LENGTH = 564.705882
+GOAL_WIDTH= 17 #target goal width in inches
 
 #Trig Data
 RADIAN_TO_DEGREE = float(180.0/math.pi)

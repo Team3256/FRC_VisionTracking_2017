@@ -128,6 +128,8 @@ def main():
 
                 distance_away = get_distance_from_cam(pixel_width)
                 nt.putNumber('vision_distance', distance_away)
+                print 'distance: ' + str(distance_away)
+                print 'angle: ' + angleStr
 
                 cv2.putText(frame, "Pixel Width: " + str(pixel_width), constants.TEXT_COORDINATE_3, cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
                 cv2.putText(frame, "Distance: " + str(distance_away), constants.TEXT_COORDINATE_4, cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
@@ -139,9 +141,10 @@ def main():
 
 
             #show image
-            cv2.imshow('mask', mask)
-            cv2.imshow('HSV', hsv)
-            cv2.imshow('frame',frame)
+            #cv2.imshow('mask', mask)
+            #cv2.imshow('HSV', hsv)
+            #cv2.imshow('frame',frame)
+            cv2.imwrite('/home/ubuntu/FRC_VisionTracking_2017/frame.jpg', frame)
 
             #close if delay in camera feed is too long
             k = cv2.waitKey(30) & 0xFF
