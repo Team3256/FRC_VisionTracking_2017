@@ -9,6 +9,10 @@ import time
 import math
 from networktables import NetworkTables
 
+def solidity(contour):
+    x,y,w,h = cv2.boundingRect(contour)
+    return cv2.contourArea(contour)/(w*h)
+
 def get_center(contour):
     #get moments data from contour
     moments = cv2.moments(contour)
@@ -95,10 +99,10 @@ def main():
             #Threshold the HSV image to only get the green color.
             mask = cv2.inRange(hsv, lower_green, upper_green)
             #Gets contours of the thresholded image.
-            contours, hierarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_TC89_KCOS)
-            contours = [x for x in contours if cv2.contourArea(x) >= constants.MIN_CONTOUR_AREA]
+            contours, hierarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            contours = [x for x in contours if cv2.contourArea(x) >= constants.MIN_CONTOUR_AREA and solidity(x) >= 0.4 and solidity(x) <= 1]
             #Draw the contours around detected object
-            cv2.drawContours(frame, contours, -1, (0,0,255), 3)
+            cv2.drawContours(frame, contours, -1, (0,0,255), 2)
             #Get centroid of tracked object.
             #Check to see if contours were found.
             if len(contours) > 0:   
@@ -109,7 +113,7 @@ def main():
                 i = 0
                 while i < len(contours):
                     if np.array_equal(contours[i], cnt):
-                        cv2.drawContours(frame, contours, i, (0, 255, 255), 3)
+                        cv2.drawContours(frame, contours, i, (0, 255, 255), 2)
                         contours.pop(i)
                     i += 1
 
@@ -127,6 +131,7 @@ def main():
                 pixel_width = rightmost[0] - leftmost[0]
 
                 distance_away = get_distance_from_cam(pixel_width)
+		distance_away = math.sqrt(distance_away**2 - 86**2)
                 nt.putNumber('vision_distance', distance_away)
                 print 'distance: ' + str(distance_away)
                 print 'angle: ' + angleStr
