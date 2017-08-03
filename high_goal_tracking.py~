@@ -24,7 +24,19 @@ def get_center(contour):
         center_y = int(moments["m01"]/moments["m00"])
         #return a tuple with center coordinates
         center = (center_x, center_y)
-	print center
+        return center
+
+def get_delta_x(x):
+    #get moments data from contour
+    moments = cv2.moments(contour)
+    #get center x and y value from image
+    center = (0,0)
+
+    if moments["m00"] > 0:
+        center_x = int(moments["m10"]/moments["m00"])
+        center_y = int(moments["m01"]/moments["m00"])
+        #return a tuple with center coordinates
+        center = (center_x, center_y)
         return center
 
 def get_delta_x(x):
@@ -35,9 +47,9 @@ def get_delta_y(y):
     #returns difference of Y value of center of the tracked object to the targets Y value
     return constants.TARGET_Y-y
 
-'''def get_offset_angle(center_x, center_y):
+def get_offset_angle(center_x, center_y):
     delta_x = get_delta_x(center_x)
-    tan_ratio = float(math.fabs(delta_x)/constants.FOCAL_LENGTH)
+    tan_ratio = float(math.fabs(delta_x)/constants.DIST_CAM_TO_CENTER)
     angle_radians = math.atan(tan_ratio)
     degrees = float(angle_radians*constants.RADIAN_TO_DEGREE)
     if(delta_x<0):
@@ -48,19 +60,7 @@ def get_delta_y(y):
         direction = "left"
 
     return (degrees, direction)
-'''
 
-def get_offset_angle(center_x):
-    delta_x = get_delta_x(center_x)
-    print(delta_x)
-    tan_ratio = float(math.fabs(delta_x)/constants.FOCAL_LENGTH)
-    angle_rad = math.atan(tan_ratio)
-    deg = float(angle_rad*constants.RADIAN_TO_DEGREE)
-    if (delta_x<0):
-	direction = "right"
-    else:
-	direction = "left"
-    return (deg, direction)
 
 def get_distance_from_cam(pixel_width):
     # Return distance from camera in inches
@@ -120,6 +120,11 @@ def main():
                 #get center
                 center = get_center(cnt)
                 
+                angle = get_offset_angle(center[0], center[1])
+                nt.putNumber('vision_angle', angle[0] * (-1 if angle[1] == 'left' else 1));
+
+                angleStr = str(round(angle[0], 2))
+
                 # Calculate the width of the contour in pixels
                 leftmost = tuple(cnt[cnt[:,:,0].argmin()][0])
                 rightmost = tuple(cnt[cnt[:,:,0].argmax()][0])
@@ -129,10 +134,6 @@ def main():
 		distance_away = math.sqrt(distance_away**2 - 86**2)
                 nt.putNumber('vision_distance', distance_away)
                 print 'distance: ' + str(distance_away)
-		
-		angle = get_offset_angle(center[0])
-                nt.putNumber('vision_angle', angle[0] * (-1 if angle[1] == 'left' else 1));
-                angleStr = str(round(angle[0], 2))
                 print 'angle: ' + angleStr
 
                 cv2.putText(frame, "Pixel Width: " + str(pixel_width), constants.TEXT_COORDINATE_3, cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
