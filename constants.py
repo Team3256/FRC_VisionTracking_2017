@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-
-import math
 #This is the constants file that has all of the important constants for the tracker.
 
 #Comms
@@ -16,7 +13,7 @@ CAM_BRIGHTNESS = 0.05
 CAM_WIDTH = 640
 CAM_HEIGHT = 480
 
-#Threshold values 
+#Threshold values
 LOWER_GREEN = [0,30,30]
 UPPER_GREEN = [70,255,255]
 MIN_CONTOUR_AREA = 150

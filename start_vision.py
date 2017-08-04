@@ -14,4 +14,8 @@ def start():
 		print(return_code)
 		start()
 
+<<<<<<< HEAD
 start()
+=======
+start()
+>>>>>>> b23bfc160215bef7accafd28b3de336362cefe3d
